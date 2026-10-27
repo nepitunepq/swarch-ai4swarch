@@ -35,9 +35,9 @@ language: Thai
 
 | เกณฑ์ | Run a | Run b |
 |---|---|---|
-| ใช้ตัวเลขจาก scenario หรือไม่ (latency, ช่วงพีก, ข้อจำกัดของ MailFast) | | |
-| ทางเลือกที่พิจารณา (ระบุ) | | |
-| จัดการแต้มสะสมแบบ "ครั้งเดียวเท่านั้น" และ rate limit ของ MailFast หรือไม่ อย่างไร | | |
+| ใช้ตัวเลขจาก scenario หรือไม่ (latency, ช่วงพีก, ข้อจำกัดของ MailFast) | ไม่ใช้ ระบุว่าไม่มีตัวเลข และย้ายไปไว้ใน Open questions | ใช้ เช่น p95 `PlaceOrder` ≤ 500 ms, peak 200 orders/s, MailFast p95 1.5 s / p99 8 s / fail 0.5% / rate limit 50 emails/s |
+| ทางเลือกที่พิจารณา (ระบุ) | A) Synchronous orchestration B) Pub/sub ผ่าน message broker (ยังไม่เลือกเทคโนโลยี) C) Async fan-out ใน process → เลือก B | 1) Sync gRPC fan-out 2) In-process async (goroutine) 3) RabbitMQ events 4) Kafka events → เลือก RabbitMQ |
+| จัดการแต้มสะสมแบบ "ครั้งเดียวเท่านั้น" และ rate limit ของ MailFast หรือไม่ อย่างไร | แต้มสะสม: consumer ต้อง idempotent ใช้ order ID เป็น key / rate limit: retry + backoff + DLQ แต่ไม่รู้ตัวเลข limit | แต้มสะสม: dedupe ด้วย `order_id` (unique key) + manual ack หลัง commit / rate limit: `email-worker` จำกัด ≤ 50/s (prefetch + token bucket) และใช้ queue เป็น buffer |
 | มีสิ่งที่แต่งขึ้นเองหรือไม่ (ตัวเลข เครื่องมือ หรือข้อเท็จจริงที่ไม่มีใน scenario) | | |
 
 ## รับผิดชอบ ADR ฉบับสุดท้ายของตัวเอง
@@ -51,6 +51,6 @@ language: Thai
 
 | # | สิ่งที่เปลี่ยนจากร่างของ AI | เหตุผล |
 |---|---|---|
-| 1 | | |
-| 2 | | |
-| 3 | | |
+| 1 | แผนภาพ: เปลี่ยนเทคโนโลยีของ `frontend` จาก "Go" เป็น "HTTP server" และ `paymentservice` จาก "Node.js" เป็น "gRPC" และลบหมายเหตุ [Inferred] ใต้แผนภาพที่ไม่จำเป็นแล้ว | ภาษาของสอง service นี้ไม่มีในไฟล์ context ที่ AI ได้รับ AI ติดป้าย [Inferred] ไว้ใต้แผนภาพ แต่ในแผนภาพยังแสดงเหมือนเป็นข้อเท็จจริง คนอ่านอาจเข้าใจผิด |
+| 2 | Consequences: เขียนกำกับตัวเลข backlog "90,000 ฉบับ" ว่าเป็น "ตัวอย่างสมมติ" ถ้า peak ยาว 10 นาที | scenario ระบุแค่ 200 คำสั่งซื้อ/วินาที ไม่ระบุว่าช่วงพีกยาวเท่าไร ตัวเลข 10 นาทีจึงเป็นการสมมติของ AI ไม่ใช่ข้อเท็จจริง |
+| 3 | Decision: rate limit 50 emails/s ของ `email-worker` เปลี่ยนเป็นคุม "รวมทุก replica" โดยแบ่งโควตาให้แต่ละ replica (เช่น 2 replica ละ 25/s) | ร่างเดิมไม่ได้บอกว่าถ้ามีหลาย replica จะคุมรวมอย่างไร ถ้าแต่ละตัวส่ง 50/s อัตรารวมจะเกิน limit ของ MailFast เลือกแบ่งโควตาแทนการใช้ replica เดียว เพื่อให้ replica หนึ่งล่มแล้วอีเมลยังส่งต่อได้ |
