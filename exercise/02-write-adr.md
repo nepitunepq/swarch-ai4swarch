@@ -38,7 +38,7 @@ language: Thai
 | ใช้ตัวเลขจาก scenario หรือไม่ (latency, ช่วงพีก, ข้อจำกัดของ MailFast) | ไม่ใช้ ระบุว่าไม่มีตัวเลข และย้ายไปไว้ใน Open questions | ใช้ เช่น p95 `PlaceOrder` ≤ 500 ms, peak 200 orders/s, MailFast p95 1.5 s / p99 8 s / fail 0.5% / rate limit 50 emails/s |
 | ทางเลือกที่พิจารณา (ระบุ) | A) Synchronous orchestration B) Pub/sub ผ่าน message broker (ยังไม่เลือกเทคโนโลยี) C) Async fan-out ใน process → เลือก B | 1) Sync gRPC fan-out 2) In-process async (goroutine) 3) RabbitMQ events 4) Kafka events → เลือก RabbitMQ |
 | จัดการแต้มสะสมแบบ "ครั้งเดียวเท่านั้น" และ rate limit ของ MailFast หรือไม่ อย่างไร | แต้มสะสม: consumer ต้อง idempotent ใช้ order ID เป็น key / rate limit: retry + backoff + DLQ แต่ไม่รู้ตัวเลข limit | แต้มสะสม: dedupe ด้วย `order_id` (unique key) + manual ack หลัง commit / rate limit: `email-worker` จำกัด ≤ 50/s (prefetch + token bucket) และใช้ queue เป็น buffer |
-| มีสิ่งที่แต่งขึ้นเองหรือไม่ (ตัวเลข เครื่องมือ หรือข้อเท็จจริงที่ไม่มีใน scenario) | | |
+| มีสิ่งที่แต่งขึ้นเองหรือไม่ (ตัวเลข เครื่องมือ หรือข้อเท็จจริงที่ไม่มีใน scenario) | ไม่มีตัวเลขที่แต่งขึ้น เพราะย้ายสิ่งที่ไม่รู้ไปไว้ใน Open questions และติดป้าย [Assumption] / [Inferred] กำกับ | ภาษาของ `paymentservice` (Node.js) และ `frontend` (Go) ในแผนภาพไม่มีใน context; backlog "90,000 ฉบับ" สมมติเองว่า peak ยาว 10 นาที (scenario ระบุแค่ 200 คำสั่งซื้อ/วินาที ไม่ระบุความยาวของ peak); ตัวเลขอื่นในตาราง (500 ms, 200/s, MailFast 1.5 s / 8 s / 0.5% / 50/s, ทีม 2 คนเคยใช้ RabbitMQ) ตรงกับ scenario |
 
 ## รับผิดชอบ ADR ฉบับสุดท้ายของตัวเอง
 

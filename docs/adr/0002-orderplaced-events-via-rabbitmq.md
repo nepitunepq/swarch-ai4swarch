@@ -98,7 +98,7 @@ C4Container
   UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")
 ```
 
-> ตโปรโตคอล MailFast (HTTPS) ไม่ได้ระบุใน scenario — **[Assumption]**
+> โปรโตคอล MailFast (HTTPS) ไม่ได้ระบุใน scenario — **[Assumption]**
 
 ## Consequences
 

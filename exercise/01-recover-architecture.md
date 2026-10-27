@@ -48,8 +48,6 @@ evidence: system/online-boutique/protos/demo.proto, system/online-boutique/kuber
 
 ## สะท้อนคิด (ข้อละ 2–3 ประโยค)
 
-## สะท้อนคิด (ข้อละ 2–3 ประโยค)
-
 1. เปรียบเทียบ A กับ B: agent **ไม่สามารถ**รู้อะไรได้จากไฟล์ `.proto` เพียงไฟล์เดียว และเพราะเหตุใด
 
    Run A ไม่รู้ว่า service ไหนเรียก service ไหน และไม่มี `frontend`, `redis-cart` หรือข้อมูล port เลย เพราะไฟล์ `.proto` บอกแค่ว่าแต่ละ service ให้บริการอะไรได้บ้าง แต่ไม่บอกว่าใครเป็นผู้เรียก ข้อมูลว่าใครเรียกใครอยู่ในไฟล์ deploy ซึ่ง Run B ได้อ่าน จึงกู้คืน dependency ได้ครบกว่า
